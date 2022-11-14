@@ -1,0 +1,38 @@
+import csv
+import requests
+from bs4 import BeautifulSoup
+
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'}
+
+url = "https://www.flipkart.com/search?q=iphone&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=off&as=off"
+
+r = requests.get(url, headers=headers)
+
+soup = BeautifulSoup(r.content, 'html5lib')
+
+csv_file = open('reviews.csv', 'w')
+
+csv_writer = csv.writer(csv_file)
+csv_writer.writerow(['Heading', 'Username', 'Rating', 'Review'])
+
+for a in soup.findAll('a', href=True, attrs={'class':'_2yAnYN'}):
+	name=a.find('div', attrs={'class':'_3wU53n'})
+	if name:
+		name = name.text.replace('\n', '')
+		
+		rating = a.find('div', attrs={'class':'hGSR34'})
+		if rating:
+			rating = rating.text
+
+		reviews = a.find('span', attrs={'class':'_38sUEc'})
+		if reviews:
+			reviews = reviews.text.replace('\n', '').strip()
+
+			print('Heading: '+name)
+			print('Rating: '+rating)
+			print('Reviews: '+reviews)
+
+			csv_writer.writerow([name, rating, reviews])
+
+csv_file.close()
+
